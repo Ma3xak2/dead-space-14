@@ -4,19 +4,36 @@
     xmlns:controls="clr-namespace:Content.Client.UserInterface.Controls"
     xmlns:co="clr-namespace:Content.Client.UserInterface.Controls"
     MinHeight="210">
-    <BoxContainer Name="MainContainer" Orientation="Vertical">
-        <LineEdit Name="SearchBar" PlaceHolder="{Loc 'vending-machine-component-search-filter'}" HorizontalExpand="True"  Margin ="4 4"/>
-        <co:SearchListContainer Name="VendingContents" VerticalExpand="True" Margin="4 4"/>
+
+    <!-- DS14-start -->
+    <BoxContainer Name="MainContainer" Orientation="Vertical" SeparationOverride="0">
+
+        <PanelContainer StyleClasses="DS14MenuHeader">
+            <LineEdit
+                Name="SearchBar"
+                PlaceHolder="{Loc 'vending-machine-component-search-filter'}"
+                HorizontalExpand="True"
+                StyleClasses="DS14MenuInput"/>
+        </PanelContainer>
+
+        <PanelContainer StyleClasses="DS14MenuPanelDark" VerticalExpand="True">
+            <co:SearchListContainer Name="VendingContents" VerticalExpand="True" Margin="2"/>
+        </PanelContainer>
+
          <!-- Footer -->
-        <BoxContainer Orientation="Vertical">
-            <PanelContainer StyleClasses="LowDivider" />
-            <BoxContainer Orientation="Horizontal" Margin="10 2 5 0" VerticalAlignment="Bottom">
-                <Label Text="{Loc 'vending-machine-flavor-left'}" StyleClasses="WindowFooterText" />
-                <Label Text="{Loc 'vending-machine-flavor-right'}" StyleClasses="WindowFooterText"
-                        HorizontalAlignment="Right" HorizontalExpand="True"  Margin="0 0 5 0" />
-                <TextureRect StyleClasses="NTLogoDark" Stretch="KeepAspectCentered"
-                        VerticalAlignment="Center" HorizontalAlignment="Right" SetSize="19 19"/>
+        <PanelContainer StyleClasses="DS14MenuHeader">
+            <BoxContainer Orientation="Horizontal" VerticalAlignment="Center">
+                <Label Text="{Loc 'vending-machine-flavor-left'}"
+                       StyleClasses="DS14MenuSubtitle"/>
+                <Label Text="{Loc 'vending-machine-flavor-right'}"
+                       StyleClasses="DS14MenuSubtitle"
+                       HorizontalAlignment="Right"
+                       HorizontalExpand="True"
+                       Margin="0 0 4 0"/>
             </BoxContainer>
-        </BoxContainer>
+        </PanelContainer>
+
     </BoxContainer>
+    <!-- DS14-end -->
+
 </controls:FancyWindow>

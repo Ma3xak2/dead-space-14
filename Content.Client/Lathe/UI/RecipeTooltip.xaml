@@ -1,19 +1,13 @@
 <Control xmlns="https://spacestation14.io"
-         xmlns:gfx="clr-namespace:Robust.Client.Graphics;assembly=Robust.Client"
          MaxWidth="400">
-    <PanelContainer>
-        <PanelContainer.PanelOverride>
-            <gfx:StyleBoxFlat 
-                BorderThickness="2" 
-                BorderColor="#464966"
-                BackgroundColor="#25252A"
-            />
-        </PanelContainer.PanelOverride>
-        <BoxContainer 
+    <!-- DS14-start -->
+    <PanelContainer StyleClasses="DS14MenuPopupPanel">
+        <BoxContainer
             Orientation="Vertical"
             RectClipContent="True"
             Margin="4">
-            <RichTextLabel Name="RecipeTooltipLabel" HorizontalExpand="True" />
+            <RichTextLabel Name="RecipeTooltipLabel" HorizontalExpand="True"/>
         </BoxContainer>
     </PanelContainer>
+    <!-- DS14-end -->
 </Control>

@@ -1,18 +1,22 @@
 <Control xmlns="https://spacestation14.io">
+    <!-- DS14-start -->
     <Button
         Name="Button"
         HorizontalExpand="True"
         Margin="0"
-        StyleClasses="ButtonSquare">
+        StyleClasses="DS14MenuTopButton">
         <BoxContainer Orientation="Horizontal">
             <BoxContainer
                 Name="RecipeDisplayContainer"
-                Margin="0 0 4 0"
+                Margin="4 2 0 2"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
-                MinSize="32 32"
-                />
-            <Label Name="RecipeName" HorizontalExpand="True" />
+                MinSize="32 32"/>
+            <Label Name="RecipeName"
+                   HorizontalExpand="True"
+                   VerticalAlignment="Center"
+                   StyleClasses="DS14MenuProfileLabel"/>
         </BoxContainer>
     </Button>
+    <!-- DS14-end -->
 </Control>

@@ -99,18 +99,27 @@ namespace Content.Client.VendingMachines.UI
                 SearchBar.Visible = false;
                 VendingContents.Visible = false;
 
+                var outOfStockPanel = new PanelContainer
+                {
+                    StyleClasses = { "DS14MenuPanelDark" },
+                    VerticalExpand = true,
+                    HorizontalExpand = true
+                };
+
                 var outOfStockLabel = new Label()
                 {
                     Text = Loc.GetString("vending-machine-component-try-eject-out-of-stock"),
                     Margin = new Thickness(4, 4),
                     HorizontalExpand = true,
                     VerticalAlignment = VAlignment.Stretch,
-                    HorizontalAlignment = HAlignment.Center
+                    HorizontalAlignment = HAlignment.Center,
+                    StyleClasses = { "DS14MenuProfileLabel" }
                 };
 
-                MainContainer.AddChild(outOfStockLabel);
+                outOfStockPanel.AddChild(outOfStockLabel);
+                MainContainer.AddChild(outOfStockPanel);
 
-                SetSizeAfterUpdate(outOfStockLabel.Text.Length, 0);
+                SetSizeAfterUpdate(outOfStockLabel.Text.Length, 0);   
 
                 return;
             }

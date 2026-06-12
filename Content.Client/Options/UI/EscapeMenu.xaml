@@ -34,7 +34,7 @@
             <PanelContainer StyleClasses="DS14MenuAccentDim" />
 
             <Button Access="Public" Name="DisconnectButton" Text="{Loc 'ui-escape-disconnect'}" StyleClasses="DS14MenuAction" />
-            <Button Access="Public" Name="QuitButton" Text="{Loc 'ui-escape-quit'}" StyleClasses="ButtonColorRed" MinHeight="42" />
+            <Button Access="Public" Name="QuitButton" Text="{Loc 'ui-escape-quit'}" StyleClasses="DS14MenuQuitButton" MinHeight="42" />
         </BoxContainer>
     </PanelContainer>
     <!-- DS14-end -->

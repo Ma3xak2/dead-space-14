@@ -47,6 +47,7 @@ public sealed class DeadSpaceMenuSheetlet : Sheetlet<PalettedStylesheet>
     public const string Subtitle = "DS14MenuSubtitle";
     public const string RoundStatusTitle = "DS14MenuRoundStatusTitle";
     public const string RoundStatusTime = "DS14MenuRoundStatusTime";
+    public const string QuitButton = "DS14MenuQuitButton";
 
     public override StyleRule[] GetRules(PalettedStylesheet sheet, object config)
     {
@@ -449,6 +450,12 @@ public sealed class DeadSpaceMenuSheetlet : Sheetlet<PalettedStylesheet>
         {
             BackgroundColor = Color.FromHex("#10161FF8"),
             BorderColor = Color.FromHex("#5D6A7C"),
+        };
+
+        var quitButtonPressed = new StyleBoxFlat(actionButton)
+        {
+            BackgroundColor = Color.FromHex("#7A2030F7"),
+            BorderColor = Color.FromHex("#FF6B6B"),
         };
 
         return
@@ -926,6 +933,39 @@ public sealed class DeadSpaceMenuSheetlet : Sheetlet<PalettedStylesheet>
                 .PseudoPressed()
                 .Box(actionButtonPositivePressed)
                 .Modulate(Color.White),
+            E<ContainerButton>()
+                .Class(ContainerButton.StyleClassButton)
+                .Class(QuitButton)
+                .PseudoNormal()
+                .Box(readyNotReady)
+                .Modulate(Color.White),
+            E<ContainerButton>()
+                .Class(ContainerButton.StyleClassButton)
+                .Class(QuitButton)
+                .PseudoHovered()
+                .Box(readyNotReadyHover)
+                .Modulate(Color.White),
+            E<ContainerButton>()
+                .Class(ContainerButton.StyleClassButton)
+                .Class(QuitButton)
+                .PseudoPressed()
+                .Box(quitButtonPressed)
+                .Modulate(Color.White),
+            E<ContainerButton>()
+                .Class(ContainerButton.StyleClassButton)
+                .Class(QuitButton)
+                .PseudoDisabled()
+                .Box(actionButtonDisabled)
+                .Modulate(Color.White),
+            E<ContainerButton>()
+                .Class(ContainerButton.StyleClassButton)
+                .Class(QuitButton)
+                .MinHeight(42),
+            E<ContainerButton>()
+                .Class(ContainerButton.StyleClassButton)
+                .Class(QuitButton)
+                .ParentOf(E<Label>())
+                .Font(sheet.BaseFont.GetFont(12, FontKind.Bold)),
         ];
     }
 }
