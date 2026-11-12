@@ -1,10 +1,12 @@
 ﻿using Content.Shared.Examine;
 using Content.Shared.IdentityManagement;
+using Content.Shared.DeadSpace.Temperature;
 using Content.Shared.Mobs;
 using Content.Shared.Mobs.Components;
 using Content.Shared.Mobs.Systems;
 using Content.Shared.Rejuvenate;
 using Robust.Shared.Containers;
+using Robust.Shared.Random; // DS14
 using Robust.Shared.Timing;
 
 namespace Content.Shared.Atmos.Rotting;
@@ -14,6 +16,7 @@ public abstract class SharedRottingSystem : EntitySystem
     [Dependency] private readonly IGameTiming _timing = default!;
     [Dependency] private readonly SharedContainerSystem _container = default!;
     [Dependency] private readonly MobStateSystem _mobState = default!;
+    [Dependency] private readonly IRobustRandom _random = default!; // DS14
 
     public const int MaxStages = 3;
 
@@ -32,7 +35,7 @@ public abstract class SharedRottingSystem : EntitySystem
 
     private void OnPerishableMapInit(Entity<PerishableComponent> ent, ref MapInitEvent args)
     {
-        ent.Comp.RotNextUpdate = _timing.CurTime + ent.Comp.PerishUpdateRate;
+        ent.Comp.RotNextUpdate = _timing.CurTime + ent.Comp.PerishUpdateRate * _random.NextDouble(); // DS14
     }
 
     private void OnMobStateChanged(Entity<PerishableComponent> ent, ref MobStateChangedEvent args)
@@ -58,6 +61,11 @@ public abstract class SharedRottingSystem : EntitySystem
         }
 
         var isMob = HasComp<MobStateComponent>(perishable);
+        // DS14-start
+        if (stage == 1 && isMob && TryComp<CorpseBurningComponent>(perishable, out var burns) &&
+            burns.SuppressFreshDescription)
+            return;
+        // DS14-end
         var description = "perishable-" + stage + (!isMob ? "-nonmob" : string.Empty);
         args.PushMarkup(Loc.GetString(description, ("target", Identity.Entity(perishable, EntityManager))));
     }

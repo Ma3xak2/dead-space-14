@@ -7,6 +7,10 @@
   components:
   - type: HumanoidAppearance
     species: Diona
+  # DS14-start
+  - type: CorpseBurning
+    messageType: plant
+  # DS14-end
   - type: Satiation
     satiations:
       Hunger:
@@ -22,8 +26,8 @@
   - type: Damageable
     damageContainer: Biological
     damageModifierSet: Diona
-  - type: DamageVisuals
-    damageOverlayGroups:
+  - type: LimbWoundVisuals
+    groups:
       Brute:
         sprite: Mobs/Effects/brute_damage.rsi
         color: "#cd7314"

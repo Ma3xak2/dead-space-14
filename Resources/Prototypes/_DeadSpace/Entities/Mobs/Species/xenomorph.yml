@@ -126,12 +126,15 @@
     requiredLegs: 2
   - type: HumanoidAppearance
     species: Xenomorph
-  - type: DamageVisuals
-    damageOverlayGroups:
+  - type: CorpseBurning
+    messageType: chitin
+  - type: LimbWoundVisuals
+    groups:
       Brute:
         sprite: Mobs/Effects/brute_damage.rsi
         color: "#9106d1"
-
+    #bandage:
+    #  sprite: _DeadSpace/Mobs/Effects/bandage.rsi
 - type: entity
   parent: BaseSpeciesDummy
   id: MobXenomorphDummy

@@ -1,3 +1,4 @@
+using Content.Shared.DeadSpace.TTS;
 using System.Linq;
 using Content.Server.Administration.Logs;
 using Content.Server.AlertLevel;
@@ -232,6 +233,12 @@ namespace Content.Server.Communications
             if (!comp.CanShuttle)
                 return false;
 
+            //DS14-start
+            var stationUid = _stationSystem.GetOwningStation(comp.Owner);
+            if (stationUid != null && _alertLevelSystem.IsCallEvacBlocked(stationUid.Value))
+                return false;
+            //DS14-end
+
             // Calling shuttle checks
             if (_roundEndSystem.ExpectedCountdownEnd is null)
                 return true;
@@ -308,7 +315,7 @@ namespace Content.Server.Communications
                 languageId = languageComponent.SelectedLanguage;
 
             if (TryComp<TTSComponent>(message.Actor, out var tts))
-                voice = tts.VoicePrototypeId;
+                voice = TTSVoices.GetVoice(tts, _cfg.GetCVar(TTSProviderCVars.Provider)); // DS14
             // DS14-Languages-end
 
             if (comp.AnnounceSentBy)
@@ -584,7 +591,12 @@ namespace Content.Server.Communications
                 if (message.UseCustomTts)
                 {
                     voice = message.VoiceId?.Trim();
-                    if (string.IsNullOrEmpty(voice) || !_prototypeManager.HasIndex<TTSVoicePrototype>(voice))
+                    // DS14-start
+                    var invalidVoice = string.IsNullOrEmpty(voice) ||
+                        !_prototypeManager.TryIndex<TTSVoicePrototype>(voice, out var voicePrototype) ||
+                        voicePrototype.Provider != _cfg.GetCVar(TTSProviderCVars.Provider);
+                    // DS14-end
+                    if (invalidVoice) // DS14
                     {
                         SendEmagAccessState(uid, component, actor, error: EmagCommunicationsUiError.InvalidVoice);
                         return;

@@ -14,10 +14,12 @@ using Content.Shared.Mining.Components;
 using Content.Shared.Mobs.Components;
 using Content.Shared.Mobs.Systems;
 using Content.Shared.Popups;
+using Content.Shared.Projectiles;
 using Content.Shared.Timing;
 using Content.Shared.Verbs;
 using Content.Shared.Wall;
 using Robust.Shared.Audio.Systems;
+using Robust.Shared.Containers;
 using Robust.Shared.Map;
 using Robust.Shared.Physics.Components;
 using Robust.Shared.Physics.Systems;
@@ -45,6 +47,7 @@ public sealed class LavalandResonatorSystem : EntitySystem
     [Dependency] private readonly MobStateSystem _mobState = default!;
     [Dependency] private readonly IRobustRandom _random = default!;
     [Dependency] private readonly SharedAudioSystem _audio = default!;
+    [Dependency] private readonly SharedContainerSystem _container = default!;
     [Dependency] private readonly SharedPhysicsSystem _physics = default!;
     [Dependency] private readonly SharedPopupSystem _popup = default!;
     [Dependency] private readonly TurfSystem _turf = default!;
@@ -63,6 +66,7 @@ public sealed class LavalandResonatorSystem : EntitySystem
         SubscribeLocalEvent<LavalandResonatorComponent, GetVerbsEvent<AlternativeVerb>>(OnGetAlternativeVerbs);
         SubscribeLocalEvent<GatherableComponent, GetVerbsEvent<AlternativeVerb>>(OnMineableGetAlternativeVerbs);
         SubscribeLocalEvent<LavalandResonanceFieldComponent, ComponentShutdown>(OnFieldShutdown);
+        SubscribeLocalEvent<LavalandResonatorBoltComponent, BeforeProjectileHitEvent>(OnBoltBeforeHit);
     }
 
     public override void Update(float frameTime)
@@ -176,6 +180,10 @@ public sealed class LavalandResonatorSystem : EntitySystem
         EntityCoordinates targetCoords,
         bool showInvalidPopup = true)
     {
+        // Shut in a body bag, a locker or the like, the user can't reach the rock outside to set a field on it.
+        if (_container.IsEntityInContainer(user))
+            return true;
+
         if (!_turf.TryGetTileRef(targetCoords, out var tileRef))
             return false;
 
@@ -218,6 +226,9 @@ public sealed class LavalandResonatorSystem : EntitySystem
         fieldComp.BonusYieldChance = ent.Comp.BonusYieldChance;
         fieldComp.BonusYieldMultiplier = ent.Comp.BonusYieldMultiplier;
         fieldComp.BurstSound = ent.Comp.BurstSound;
+        fieldComp.BossDamageFalloff = ent.Comp.BossDamageFalloff;
+        fieldComp.BossDamageMinMultiplier = ent.Comp.BossDamageMinMultiplier;
+        fieldComp.BossDamageWindow = ent.Comp.BossDamageWindow;
 
         ent.Comp.Fields.Add(fieldUid);
         _audio.PlayPvs(ent.Comp.PlaceSound, fieldUid);
@@ -377,9 +388,13 @@ public sealed class LavalandResonatorSystem : EntitySystem
                 continue;
             }
 
+            var bossMultiplier = ConsumeBossDamageMultiplier(uid,
+                field.BossDamageFalloff,
+                field.BossDamageMinMultiplier,
+                field.BossDamageWindow);
             _damageable.TryChangeDamage(
                 (uid, damageable),
-                new DamageSpecifier(damage),
+                damage * bossMultiplier,
                 interruptsDoAfters: false,
                 origin: field.Creator ?? activator ?? field.Resonator);
         }
@@ -399,6 +414,13 @@ public sealed class LavalandResonatorSystem : EntitySystem
         for (var i = 0; i < count; i++)
         {
             var projectile = Spawn(projectilePrototype, fieldXform.Coordinates);
+            if (field.BossDamageFalloff > 0f)
+            {
+                var bolt = EnsureComp<LavalandResonatorBoltComponent>(projectile);
+                bolt.BossDamageFalloff = field.BossDamageFalloff;
+                bolt.BossDamageMinMultiplier = field.BossDamageMinMultiplier;
+                bolt.BossDamageWindow = field.BossDamageWindow;
+            }
             _gun.ShootProjectile(
                 projectile,
                 CardinalDirections[i],
@@ -407,6 +429,55 @@ public sealed class LavalandResonatorSystem : EntitySystem
                 shooter,
                 field.BurstProjectileSpeed);
         }
+    }
+
+    private void OnBoltBeforeHit(Entity<LavalandResonatorBoltComponent> ent, ref BeforeProjectileHitEvent args)
+    {
+        var multiplier = ConsumeBossDamageMultiplier(args.Target,
+            ent.Comp.BossDamageFalloff,
+            ent.Comp.BossDamageMinMultiplier,
+            ent.Comp.BossDamageWindow);
+        if (multiplier < 1f)
+            args.Damage = args.Damage * multiplier;
+    }
+
+    /// <summary>Share of the usual boss falloff the Legion gets.</summary>
+    private const float LegionFalloffScale = 0.4f;
+
+    /// <summary>The least a resonator hit does to the Legion, however often it is hit.</summary>
+    private const float LegionMinMultiplier = 0.5f;
+
+    /// <summary>
+    /// Returns the damage multiplier for a resonator hit on a boss and records the hit:
+    /// every hit within the window makes the next one weaker.
+    /// </summary>
+    private float ConsumeBossDamageMultiplier(EntityUid target, float falloff, float minMultiplier, TimeSpan window)
+    {
+        var legion = HasComp<LavalandLegionMegafaunaComponent>(target);
+        if (falloff <= 0f ||
+            !legion &&
+            !HasComp<LavalandBossComponent>(target) &&
+            !HasComp<LavalandMadMinerComponent>(target) &&
+            !HasComp<LavalandEliteComponent>(target))
+        {
+            return 1f;
+        }
+
+        // The Legion is fought with resonators by design: its falloff is mild and never takes off more than half.
+        if (legion)
+        {
+            falloff *= LegionFalloffScale;
+            minMultiplier = MathF.Max(minMultiplier, LegionMinMultiplier);
+        }
+
+        var now = _timing.CurTime;
+        var pressure = EnsureComp<LavalandResonatorPressureComponent>(target);
+        while (pressure.Hits.Count > 0 && now - pressure.Hits.Peek() >= window)
+            pressure.Hits.Dequeue();
+
+        var multiplier = Math.Max(Math.Clamp(minMultiplier, 0f, 1f), 1f - falloff * pressure.Hits.Count);
+        pressure.Hits.Enqueue(now);
+        return multiplier;
     }
 
     private bool TryResetUseDelay(EntityUid uid)

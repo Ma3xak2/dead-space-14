@@ -30,6 +30,8 @@
     - type: Execution
       doAfterDuration: 4.0
   - type: ItemToggleHot
+  - type: LimbCut
+    factor: 1.5
   - type: ItemToggleSize
     activatedSize: Ginormous
   - type: ItemTogglePointLight
@@ -344,6 +346,7 @@
       malus: 0.7
     - type: Execution
       doAfterDuration: 4.0
+    - type: AnimationOnMelee # DS14
   - type: Wieldable
     wieldSound: null # esword light sound instead
   - type: MeleeWeapon

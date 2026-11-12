@@ -11,6 +11,7 @@ using Content.Shared.Silicons.StationAi;
 using Robust.Shared.Network;
 using Robust.Shared.Player;
 using Content.Server.DeadSpace.Languages;
+using Content.Server.DeadSpace.Body; //DS-14
 
 namespace Content.Server.Radio.EntitySystems;
 
@@ -21,6 +22,7 @@ public sealed class HeadsetSystem : SharedHeadsetSystem
     [Dependency] private readonly LanguageSystem _language = default!; // DS14-Languages
     [Dependency] private readonly IAdminManager _admin = default!; // DS14
     [Dependency] private readonly GameTicker _gameTicker = default!; // DS14
+    [Dependency] private readonly LimbHearingSystem _hearing = default!; //DS-14
 
     public override void Initialize()
     {
@@ -165,7 +167,7 @@ public sealed class HeadsetSystem : SharedHeadsetSystem
         if (actor != null) // DS14
         {
             // DS14-start
-            if (sendMessage)
+            if (sendMessage && !_hearing.CantHear(receiver)) //DS-14
             {
                 if (ShouldSendCommandLinkSender(receiver, actor.PlayerSession, messageSource))
                     msg = WithCommandLinkSender(msg, messageSource);

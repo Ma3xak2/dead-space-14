@@ -1,3 +1,15 @@
+# DS14-start
+- type: damageModifierSet
+  id: DragonScale
+  coefficients:
+    Blunt: 0.7
+    Piercing: 0.7
+    Slash: 0.7
+    Heat: 0.7
+    Radiation: 0.7
+    Caustic: 0.7
+# DS14-end
+
 - type: entity
   parent: [ SimpleSpaceMobBase, FlyingMobBase ]
   id: BaseMobDragon
@@ -57,6 +69,8 @@
       state: alive
     - map: [ "enum.DamageStateVisualLayers.BaseUnshaded" ]
       state: alive-unshaded
+    - map: [ "eyes" ]
+      state: alive-eyes
       shader: unshaded
   - type: Appearance
   - type: DamageStateVisuals
@@ -70,6 +84,15 @@
       Dead:
         Base: dead
         BaseUnshaded: dead-unshaded
+#ds14-start
+  - type: GenericVisualizer
+    visuals:
+      enum.MobStateVisuals.State:
+        eyes:
+          Alive: { visible: true }
+          Critical: { visible: false }
+          Dead: { visible: false }
+#ds14-end
   - type: Physics
     bodyType: KinematicController
   - type: Fixtures
@@ -94,6 +117,13 @@
       0: Alive
       500: Critical #DS14
       525: Dead #DS14
+  # DS14-start
+  - type: Damageable
+    damageModifierSet: DragonScale
+  - type: ExplosionResistance
+    worn: false # only the dragon itself gets this resistance
+    damageCoefficient: 0.6 # 40% explosion resistance
+  # DS14-end
   - type: SlowOnDamage
     speedModifierThresholds:
       325: 0.7 #DS14
@@ -204,7 +234,7 @@
   - type: AntiRottingContainer
   - type: NecromorfAfterInfection
     necroPrototype: NecroDragon # DS14
-  - type: GhostRoleNotifys 
+  - type: GhostRoleNotifys
     groupPrototype: Dragonping
   - type: Destructible
     thresholds:
@@ -273,7 +303,7 @@
   description: For dragon's breathing.
   components:
   - type: RechargeBasicEntityAmmo
-    rechargeCooldown: 5
+    rechargeCooldown: 8 #ds14
     rechargeSound:
       path: /Audio/Animals/space_dragon_roar.ogg
   - type: BasicEntityAmmoProvider

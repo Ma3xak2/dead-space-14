@@ -8,7 +8,9 @@ using Content.Shared.CombatMode;
 using Content.Shared.Containers.ItemSlots;
 using Content.Shared.Damage;
 using Content.Shared.Damage.Systems;
+using Content.Shared.DeadSpace.Body.Limbs;
 using Content.Shared.DeadSpace.Weapons.Akimbo;
+using Content.Shared.Movement.Components;
 using Content.Shared.Examine;
 using Content.Shared.Hands;
 using Content.Shared.Hands.EntitySystems;
@@ -115,6 +117,7 @@ public abstract partial class SharedGunSystem : EntitySystem
         InitializeContainer();
         InitializeSolution();
         InitializeTargetFinder(); // DS14 - pre-v288 explicit event subscriptions (#45247)
+        InitializeNinja(); // DS14
 
         // Interactions
         SubscribeLocalEvent<GunComponent, GetVerbsEvent<AlternativeVerb>>(OnAltVerb);
@@ -281,6 +284,19 @@ public abstract partial class SharedGunSystem : EntitySystem
     }
     // DS14-end
 
+    // DS14-start
+    /// <summary>
+    /// Aims a projectile shot without a gun at a target, so it hits the target even lying down
+    /// (shots fly over anyone lying who isn't their target).
+    /// </summary>
+    public void SetProjectileTarget(EntityUid projectile, EntityUid target)
+    {
+        var targeted = EnsureComp<TargetedProjectileComponent>(projectile);
+        targeted.Target = target;
+        Dirty(projectile, targeted);
+    }
+    // DS14-end
+
     /// <summary>
     /// Attempts to shoot at the target coordinates. Resets the shot counter after every shot.
     /// </summary>
@@ -352,7 +368,15 @@ public abstract partial class SharedGunSystem : EntitySystem
         var fireRate = TimeSpan.FromSeconds(1f / gun.Comp.FireRateModified);
 
         if (gun.Comp.SelectedMode == SelectiveFire.Burst || gun.Comp.BurstActivated)
-            fireRate = TimeSpan.FromSeconds(1f / gun.Comp.BurstFireRate);
+        {
+            var burst = gun.Comp.BurstFireRate;
+            // DS14-start
+            if (TryComp<LimbAimComponent>(user, out var aim) && aim.Aiming
+                && (!TryComp<InputMoverComponent>(user, out var mover) || LimbWoundRules.AimIsPrecise(mover.HasDirectionalMovement, mover.Sprinting)))
+                burst *= LimbWoundRules.AimFireRate;
+            // DS14-end
+            fireRate = TimeSpan.FromSeconds(1f / burst);
+        }
 
         // First shot
         // Previously we checked shotcounter but in some cases all the bullets got dumped at once

@@ -22,12 +22,14 @@
     rules:
     - id: Thief
       prob: 0.5
-    - id: Hooligan # DS14 
+    - id: Hooligan # DS14
       prob: 1
     - id: SubWizard
       prob: 0.05
-    - id: SubXenoborgs
-      prob: 0.05
+#ds14-start
+#    - id: SubXenoborgs
+#      prob: 0.05
+#ds14-end
     - id: Changeling
       prob: 0.25
 
@@ -41,8 +43,10 @@
       prob: 0.5
     - id: Hooligan # DS14
       prob: 1
-    - id: SubXenoborgs
-      prob: 0.05
+#ds14-start
+#    - id: SubXenoborgs
+#      prob: 0.05
+#ds14-end
     - id: Changeling
       prob: 0.25
 
@@ -185,8 +189,6 @@
       - type: CustomNameOnSpawn
         namePrefix: "Командир"
       # DS14-end
-      - type: Skill
-        group: ALL
       - type: NukeOperative
       - type: RandomMetadata
         nameSegments:
@@ -223,8 +225,6 @@
         namePrefix: "Агент"
       # DS14-end
       - type: NukeOperative
-      - type: Skill
-        group: ALL
       - type: RandomMetadata
         nameSegments:
         - NamesSyndicateNormal
@@ -262,8 +262,6 @@
         namePrefix: "Оператор"
       # DS14-end
       - type: NukeOperative
-      - type: Skill
-        group: ALL
       - type: RandomMetadata
         nameSegments:
         - NamesSyndicateNormal
@@ -315,9 +313,6 @@
     - prefRoles: [ Traitor ]
       max: 8
       playerRatio: 10
-      components:
-      - type: Skill
-        group: ALL
       blacklist:
         components:
         - AntagImmune
@@ -345,9 +340,6 @@
     - prefRoles: [ Traitor ]
       max: 15
       playerRatio: 5
-      components:
-      - type: Skill
-        group: ALL
       blacklist:
         components:
         - AntagImmune
@@ -376,9 +368,6 @@
       mindRoles:
       - MindRoleTraitorReinforcement
       sponsorsPriority: true
-      components:
-      - type: Skill
-        group: ALL
 
 - type: entity
   id: Changeling
@@ -407,8 +396,6 @@
         color: Red
         sound: /Audio/Ambience/Antag/changeling_start.ogg
       components:
-      - type: Skill
-        group: ALL
       - type: ChangelingDevour
       - type: ChangelingIdentity
       - type: ChangelingTransform
@@ -492,8 +479,6 @@
       components:
       - type: Revolutionary
       - type: HeadRevolutionary
-      - type: Skill
-        group: ALL
       mindRoles:
       - MindRoleHeadRevolutionary
       sponsorsPriority: true
@@ -552,8 +537,6 @@
       startingGear: WizardBlueGear
       # TODO: WizardComp as needed
       components:
-      - type: Skill
-        group: ALL
       - type: NpcFactionMember
         factions:
         - Wizard
@@ -596,8 +579,6 @@
       - type: ZombifyOnDeath
       - type: IncurableZombie
       - type: InitialInfected
-      - type: Skill
-        group: ALL
       mindRoles:
       - MindRoleInitialInfected
       sponsorsPriority: true
@@ -618,8 +599,19 @@
   parent: BaseXenoborgsRule
   id: Xenoborgs
   components:
+#ds14-start
+  - type: StationEvent
+    earliestStart: 60
+    minimumPlayers: 30
+    weight: 1
+    duration: null # XenoborgsRule must stay active for shuttle/round-end checks
+    reoccurrenceDelay: 60
+    maxOccurrences: 1
+    occursDuringRoundEnd: false
+  #ds14-end
   - type: GameRule
     minPlayers: 30
+    cancelPresetOnTooFewPlayers: false #ds14
   - type: AntagMultipleRoleSpawner
     antagRoleToPrototypes:
       MothershipCore: [ MothershipCore ]
